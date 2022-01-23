@@ -61,50 +61,50 @@ task api(type: Javadoc) {
 /**
  * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
  */
-dokka {
-	dependsOn {
-		tasks.getByName("api")
-	}
-
-	doFirst {
-		configuration {
-			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-
-			moduleProjects.findAll {
-				it.pluginManager.hasPlugin("kotlin")
-			}.each { project ->
-				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-				kotlinDirs -= project.sourceSets.main.java.srcDirs
-				kotlinDirs.each { dir ->
-					if (dir.exists()) {
-						sourceRoot {
-							path = dir.path
-						}
-					}
-				}
-			}
-		}
-	}
-
-	outputFormat = "html"
-	outputDirectory = "$buildDir/docs/kdoc"
-
-	configuration {
-		moduleName = "spring-framework"
-
-		externalDocumentationLink {
-			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-		}
-		externalDocumentationLink {
-			url = new URL("https://projectreactor.io/docs/core/release/api/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
-		}
-	}
-}
+//dokka {
+//	dependsOn {
+//		tasks.getByName("api")
+//	}
+//
+//	doFirst {
+//		configuration {
+//			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+//			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+//
+//			moduleProjects.findAll {
+//				it.pluginManager.hasPlugin("kotlin")
+//			}.each { project ->
+//				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+//				kotlinDirs -= project.sourceSets.main.java.srcDirs
+//				kotlinDirs.each { dir ->
+//					if (dir.exists()) {
+//						sourceRoot {
+//							path = dir.path
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	outputFormat = "html"
+//	outputDirectory = "$buildDir/docs/kdoc"
+//
+//	configuration {
+//		moduleName = "spring-framework"
+//
+//		externalDocumentationLink {
+//			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+//			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
+//		}
+//		externalDocumentationLink {
+//			url = new URL("https://projectreactor.io/docs/core/release/api/")
+//		}
+//		externalDocumentationLink {
+//			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+//		}
+//	}
+//}
 
 task downloadResources(type: Download) {
 	def version = "0.2.1.RELEASE"
@@ -149,21 +149,21 @@ asciidoctorj {
  * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
  * in "build/docs/ref-docs/html5".
  */
-asciidoctor {
-	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
-	sources {
-		include '*.adoc'
-	}
-	outputDir "$buildDir/docs/ref-docs/html5"
-	logDocuments = true
-	resources {
-		from(sourceDir) {
-			include 'images/*', 'css/**', 'js/**'
-		}
-		from extractDocResources
-	}
-}
+//asciidoctor {
+//	baseDirFollowsSourceDir()
+//	configurations 'asciidoctorExt'
+//	sources {
+//		include '*.adoc'
+//	}
+//	outputDir "$buildDir/docs/ref-docs/html5"
+//	logDocuments = true
+//	resources {
+//		from(sourceDir) {
+//			include 'images/*', 'css/**', 'js/**'
+//		}
+//		from extractDocResources
+//	}
+//}
 
 /**
  * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
@@ -209,25 +209,50 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dok
 /**
  * Zip all Spring Framework schemas into a single archive
  */
+//task schemaZip(type: Zip) {
+//	group = "Distribution"
+//	archiveBaseName.set("spring-framework")
+//	archiveClassifier.set("schema")
+//	description = "Builds -${archiveClassifier} archive containing all " +
+//			"XSDs for deployment at https://springframework.org/schema."
+//	duplicatesStrategy DuplicatesStrategy.EXCLUDE
+//	moduleProjects.each { module ->
+//		def Properties schemas = new Properties();
+//
+//		module.sourceSets.main.resources.find {
+//			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
+//		}?.withInputStream { schemas.load(it) }
+//
+//		for (def key : schemas.keySet()) {
+//			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+//			assert shortName != key
+//			File xsdFile = module.sourceSets.main.resources.find {
+//				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
+//			}
+//			assert xsdFile != null
+//			into (shortName) {
+//				from xsdFile.path
+//			}
+//		}
+//	}
+//}
 task schemaZip(type: Zip) {
 	group = "Distribution"
-	archiveBaseName.set("spring-framework")
-	archiveClassifier.set("schema")
-	description = "Builds -${archiveClassifier} archive containing all " +
+	baseName = "spring-framework"
+	classifier = "schema"
+	description = "Builds -${classifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
-	duplicatesStrategy DuplicatesStrategy.EXCLUDE
-	moduleProjects.each { module ->
+	duplicatesStrategy 'exclude'
+	moduleProjects.each { subproject ->
 		def Properties schemas = new Properties();
-
-		module.sourceSets.main.resources.find {
-			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
+		subproject.sourceSets.main.resources.find {
+			it.path.endsWith("META-INF\\spring.schemas")
 		}?.withInputStream { schemas.load(it) }
-
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
 			assert shortName != key
-			File xsdFile = module.sourceSets.main.resources.find {
-				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
+			File xsdFile = subproject.sourceSets.main.resources.find {
+				it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\'))
 			}
 			assert xsdFile != null
 			into (shortName) {
@@ -236,6 +261,7 @@ task schemaZip(type: Zip) {
 		}
 	}
 }
+
 
 /**
  * Create a distribution zip with everything:
