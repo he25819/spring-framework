@@ -516,40 +516,52 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
+			// 1：准备刷新上下文环境
 			// Prepare this context for refreshing.
 			prepareRefresh();
 
+			// 2：获取告诉子类初始化Bean工厂
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
+			// 3：对Bean工厂进行填充属性
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
 			try {
+				// 第四：留个子类去实现该接口
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
+				// 调用我们的bean工厂的后置处理器。1将class扫描成bean定义 2.bean工厂的后置处理器调用
 				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
+				// 注册我们bean的后置处理器
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 
+				// 初始化国际化资源处理器
 				// Initialize message source for this context.
 				initMessageSource();
 
+				// 创建事件多播器
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
+				// 这个方法同样也是留个子类实现的springboot也是从这个方法进行启动tomcat的
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
+				// 把我们的事件监听器注册到多播器上
 				// Check for listener beans and register them.
 				registerListeners();
 
+				// 实例化我们所有的单实例bean
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 
+				// 最后容器刷新 发布刷新事件（Spring Cloud也是从这里启动的）
 				// Last step: publish corresponding event.
 				finishRefresh();
 			}
@@ -600,7 +612,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Initialize any placeholder property sources in the context environment.
 		initPropertySources();
 
-		// Validate that all properties marked as required are resolvable:
+		// 用来校验我们容器启动必须依赖的环境变量的值 // Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
 		getEnvironment().validateRequiredProperties();
 
@@ -635,6 +647,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		/**
+		 * xml加载spring会在这里加载beanDefinition
+		 * javaConfig只是刷新了beanFactory
+		 */
 		refreshBeanFactory();
 		return getBeanFactory();
 	}
