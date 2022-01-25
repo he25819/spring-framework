@@ -136,9 +136,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		synchronized (this.singletonObjects) {
+			// 加入到单例缓存池中
 			this.singletonObjects.put(beanName, singletonObject);
+			// 从三级缓存中移除（针对的不是处理循环依赖的）
 			this.singletonFactories.remove(beanName);
+			// 从二级缓存中移除（循环依赖的时候 早期对象存在于二级缓存）
 			this.earlySingletonObjects.remove(beanName);
+			// 用来记录保存已经处理的bean
 			this.registeredSingletons.add(beanName);
 		}
 	}

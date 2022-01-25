@@ -1,6 +1,7 @@
 package gq.he25819.beans;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class Car /*implements FactoryBean<Car>*/ {
 	private String name = "兰博基尼";
+
+	@Autowired
+	private Tank tank;
 
 	public Car() {
 		System.out.println("new Car()");
@@ -24,10 +28,19 @@ public class Car /*implements FactoryBean<Car>*/ {
 		this.name = name;
 	}
 
+	public Tank getTank() {
+		return tank;
+	}
+
+	public void setTank(Tank tank) {
+		this.tank = tank;
+	}
+
 	@Override
 	public String toString() {
 		return "Car{" +
 				"name='" + name + '\'' +
+				", tank=" + tank +
 				'}';
 	}
 /*
