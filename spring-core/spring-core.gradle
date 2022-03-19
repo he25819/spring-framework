@@ -41,6 +41,7 @@ dependencies {
 	coroutines(project(path: ":kotlin-coroutines", configuration: 'classesOnlyElements'))
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
+//	compile(files('kotlin-coroutines/build/libs/kotlin-coroutines-5.2.9.RELEASE.jar'))
 	compile(project(":spring-jcl"))
 	compileOnly(project(":kotlin-coroutines"))
 	compileOnly("io.projectreactor.tools:blockhound")
