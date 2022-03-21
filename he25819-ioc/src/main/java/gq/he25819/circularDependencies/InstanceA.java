@@ -22,4 +22,8 @@ public class InstanceA {
 	public void setInstanceB(InstanceB instanceB) {
 		this.instanceB = instanceB;
 	}
+
+	public void say() {
+		System.out.println("I'm A");
+	}
 }
