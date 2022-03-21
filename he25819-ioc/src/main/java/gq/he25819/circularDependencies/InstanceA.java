@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class InstanceA {
+public class InstanceA implements IApi {
 
 	@Autowired
 	private InstanceB instanceB;
@@ -23,6 +23,7 @@ public class InstanceA {
 		this.instanceB = instanceB;
 	}
 
+	@Override
 	public void say() {
 		System.out.println("I'm A");
 	}
