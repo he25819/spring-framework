@@ -639,6 +639,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			else {
 				value = resolveFieldValue(field, bean, beanName);
 			}
+			// 反射给field赋值
 			if (value != null) {
 				ReflectionUtils.makeAccessible(field);
 				field.set(bean, value);

@@ -1,3 +1,5 @@
+import gq.he25819.AppConfig;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -7,9 +9,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  **/
 public class AppMain {
 	public static void main(String[] args) {
-		ClassPathXmlApplicationContext ioc = new ClassPathXmlApplicationContext("classpath:/spring.xml");
-		System.out.println("ioc.getBean(\"car\") = " + ioc.getBean("car"));	// 获得FactoryBean修饰后的getObject()返回的对象
+//		ClassPathXmlApplicationContext ioc = new ClassPathXmlApplicationContext("classpath:/spring.xml");
+//		System.out.println("ioc.getBean(\"car\") = " + ioc.getBean("car"));	// 获得FactoryBean修饰后的getObject()返回的对象
 //		System.out.println("ioc.getBean(\"car\") = " + ioc.getBean("&car"));	// 获得Bean本身
 //		System.out.println("ioc.getBean(\"car\") = " + ioc.getBean("car"));
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+		System.out.println(context.getBean("car"));
 	}
 }

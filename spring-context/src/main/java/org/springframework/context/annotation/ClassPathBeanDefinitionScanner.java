@@ -341,6 +341,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
+		// 是否兼容
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
