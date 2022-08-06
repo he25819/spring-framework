@@ -637,6 +637,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 			}
 			else {
+				// 根据field从BeanFactory中查到的匹配的Bean对象
 				value = resolveFieldValue(field, bean, beanName);
 			}
 			// 反射给field赋值
