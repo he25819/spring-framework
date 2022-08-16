@@ -238,6 +238,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			Assert.state(lo != null, "LookupOverride not found");
 			Object[] argsToUse = (args.length > 0 ? args : null);  // if no-arg, don't insist on args at all
 			if (StringUtils.hasText(lo.getBeanName())) {
+				// @Lookup的方法直接getBean()后返回，不执行方法体
 				Object bean = (argsToUse != null ? this.owner.getBean(lo.getBeanName(), argsToUse) :
 						this.owner.getBean(lo.getBeanName()));
 				// Detect package-protected NullBean instance through equals(null) check

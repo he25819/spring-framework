@@ -272,6 +272,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								try {
 									RootBeanDefinition mbd = (RootBeanDefinition)
 											this.beanFactory.getMergedBeanDefinition(beanName);
+									// @Lookup注解的方法加入BeanDefinition中
 									mbd.getMethodOverrides().addOverride(override);
 								}
 								catch (NoSuchBeanDefinitionException ex) {
