@@ -234,6 +234,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 		this.registriesPostProcessed.add(registryId);
 
+		// 解析配置类
 		processConfigBeanDefinitions(registry);
 	}
 
