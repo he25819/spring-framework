@@ -427,6 +427,7 @@ class ConstructorResolver {
 		Class<?> factoryClass;
 		boolean isStatic;
 
+		// 注意，这里拿到的是factoryBeanName，而不是factoryMethodName，比如appConfig对象
 		String factoryBeanName = mbd.getFactoryBeanName();
 		if (factoryBeanName != null) {
 			if (factoryBeanName.equals(beanName)) {
@@ -434,6 +435,7 @@ class ConstructorResolver {
 						"factory-bean reference points back to the same bean definition");
 			}
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
+			// 该单例已经创建好了？
 			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
 				throw new ImplicitlyAppearedSingletonException();
 			}
@@ -443,6 +445,7 @@ class ConstructorResolver {
 		}
 		else {
 			// It's a static factory method on the bean class.
+			// static的@Bean方法
 			if (!mbd.hasBeanClass()) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"bean definition declares neither a bean class nor a factory-bean reference");
@@ -490,6 +493,7 @@ class ConstructorResolver {
 					candidates = Collections.singletonList(factoryMethodToUse);
 				}
 			}
+			// 找到对应的@Bean方法，由于可能参数重载，所以有可能会有多个
 			if (candidates == null) {
 				candidates = new ArrayList<>();
 				Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);

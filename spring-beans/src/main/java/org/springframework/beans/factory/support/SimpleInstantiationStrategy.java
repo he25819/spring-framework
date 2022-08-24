@@ -152,7 +152,10 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
 			try {
+				// 记录当前正在创建的@Bean的方法
 				currentlyInvokedFactoryMethod.set(factoryMethod);
+				// factoryBean就是AppConfig的代理对象（如果加了@Configuration）
+				// factoryMethod就是@Bean修饰的方法
 				Object result = factoryMethod.invoke(factoryBean, args);
 				if (result == null) {
 					result = new NullBean();

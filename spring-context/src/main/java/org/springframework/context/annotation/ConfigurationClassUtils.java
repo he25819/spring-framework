@@ -85,6 +85,7 @@ abstract class ConfigurationClassUtils {
 	public static boolean checkConfigurationClassCandidate(
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 
+		// @Bean定义的配置类Bean不是配置类，因为className为null，而xml定义的<bean>配置类是配置类
 		String className = beanDef.getBeanClassName();
 		if (className == null || beanDef.getFactoryMethodName() != null) {
 			return false;
@@ -123,9 +124,13 @@ abstract class ConfigurationClassUtils {
 		}
 
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+		// 存在@Configuration，并且proxyBeanMethods不为false时就是FULL配置类
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		// 存在@Configuration，并且proxyBeanMethods为false或者null
+		// 或有@Component、@ComponentScan、@Import、@ImportResource注解
+		// 或有@Bean的方法，就是LITE配置类
 		else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -156,6 +161,10 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Any of the typical annotations found?
+		// 只要存在@Component
+		//@ComponentScan
+		//@Import
+		//@ImportResource四个中的一个，就是LITE配置类
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
@@ -163,6 +172,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Finally, let's look for @Bean methods...
+		// 只要存在@Bean注解的方法，就是LITE配置类
 		return hasBeanMethods(metadata);
 	}
 
