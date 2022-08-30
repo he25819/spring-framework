@@ -331,10 +331,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			final InvocationCallback invocation) throws Throwable {
 
 		// If the transaction attribute is null, the method is non-transactional.
+		// TransactionAttribute就是@Transaction中的配置
 		TransactionAttributeSource tas = getTransactionAttributeSource();
+		// 获取@Transaction注解中的属性值
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
+		// 返回Spring容器中类型为TransactionManager的Bean对象
 		final TransactionManager tm = determineTransactionManager(txAttr);
 
+		// ReactiveTransactionManager用得少，并且他只是执行方式是响应式的，原理流程和普通的是一样的
 		if (this.reactiveAdapterRegistry != null && tm instanceof ReactiveTransactionManager) {
 			ReactiveTransactionSupport txSupport = this.transactionSupportCache.computeIfAbsent(method, key -> {
 				if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
@@ -353,21 +357,27 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
 		}
 
+		// 把tm强制转换为PlatformTransactionManager，所以我们在定义时得定义PlatformTransactionManager类型
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
+		// joinpoint的唯一标识，就是当前在执行的方法名字
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		if (txAttr == null || !(ptm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			// 如果有必要就创建事务，这里就涉及到事务传播机制的实现了
+			// TransactionInfo表示一个逻辑事务，比如两个逻辑事务属于同一个物理事务
 			TransactionInfo txInfo = createTransactionIfNecessary(ptm, txAttr, joinpointIdentification);
 
 			Object retVal;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
+				// 执行下一个Interceptor或被代理对象中的方法
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
+				// 抛异常了，则回滚事务，并继续抛出异常
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
@@ -383,6 +393,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 
+			// 提交事务
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
@@ -568,6 +579,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			};
 		}
 
+		// 每个事务都会创建一个TransactionStatus，但是TransactionStatus中有一个属性代表当前逻辑事务底层的物理事务是不是新的
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
@@ -580,6 +592,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+		// 返回一个TransactionInfo对象，表示得到了一个事务，可能是新创建的事务，也可能是拿到的已有的事务
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 

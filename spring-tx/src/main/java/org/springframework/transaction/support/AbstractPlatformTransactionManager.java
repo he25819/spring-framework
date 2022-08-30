@@ -344,6 +344,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// Use defaults if no transaction definition given.
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
+		// 得到一个新的DataSourceTransactionObject对象
 		Object transaction = doGetTransaction();
 		boolean debugEnabled = logger.isDebugEnabled();
 
@@ -362,14 +363,18 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
+		// 在当前Thread中没有事务的前提下，一下三个是等价的
 		else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			// 没有事务需要挂起，不过TransactionSynchronization有可能要挂起
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
 			}
 			try {
+				// 开启事务后，transaction中就会有数据库连接了，并且isTransactionActive为true
+				// 并返回TransactionStatus对象，该对象保存了很多信息，包括被挂起的资源
 				return startTransaction(def, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error ex) {
@@ -394,10 +399,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private TransactionStatus startTransaction(TransactionDefinition definition, Object transaction,
 			boolean debugEnabled, @Nullable SuspendedResourcesHolder suspendedResources) {
 
+		// 是否开启一个新的TransactionSynchronization
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+		// 开启的这个事务的状态信息：
+		// 事务的定义、用来保存数据库连接的对象、是否是新事务、是否是新的TransactionSynchronization
 		DefaultTransactionStatus status = newTransactionStatus(
 				definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
+		// 开启事务
 		doBegin(transaction, definition);
+		// 如果需要新开一个TransactionSynchronization，就把新创建的事务的一些状态信息设置到TransactionSynchronizationManager中
 		prepareSynchronization(status, definition);
 		return status;
 	}
@@ -488,6 +498,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 			}
 		}
+		// 如果依然是Propagation.REQUIRED（最经常的情况）
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 		return prepareTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 	}
